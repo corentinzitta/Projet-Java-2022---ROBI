@@ -1,6 +1,7 @@
 package exercice3;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import graphicLayer.GRect;
 import graphicLayer.GSpace;
 import stree.parser.SNode;
 import stree.parser.SParser;
+import tools.Tools;
 
 public class Exercice3_0 {
 	GSpace space = new GSpace("Exercice 3", new Dimension(200, 100));
@@ -36,12 +38,16 @@ public class Exercice3_0 {
 		this.runScript();
 	}
 
-	private void runScript() {
+	private void runScript() 
+	{
 		SParser<SNode> parser = new SParser<>();
 		List<SNode> rootNodes = null;
-		try {
+		try 
+		{
 			rootNodes = parser.parse(script);
-		} catch (IOException e) {
+		}
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 		Iterator<SNode> itor = rootNodes.iterator();
@@ -57,8 +63,48 @@ public class Exercice3_0 {
 		cmd.run();
 	}
 
-	Command getCommandFromExpr(SNode expr) {
-		return null;
+	Command getCommandFromExpr(SNode expr) 
+	{
+		Command commandeRetour = null;
+		
+		int sizeExpr = expr.size();
+		
+		String contenuNom = expr.get(0).contents(); //rubi ou space
+		String contenuCommande = expr.get(1).contents(); //commande
+		String argCmd1 = expr.get(2).contents(); //argCommande
+		String argCmd2 = "";
+		
+		if(sizeExpr > 3)
+		{
+			argCmd2 = expr.get(3).contents();
+		}
+		
+		if(contenuNom.equals("space"))
+		{
+			if(contenuCommande.equals("setColor"))
+			{
+				commandeRetour = new SpaceChangeColor(Tools.getColorByName(argCmd1));
+			}
+			else if(contenuCommande.equals("sleep"))
+			{
+				commandeRetour = new SpaceSleep(Integer.parseInt(argCmd1));
+			}
+		}
+		else if(contenuNom.equals("robi"))
+		{
+			if(contenuCommande.equals("setColor"))
+			{
+				commandeRetour = new RobiChangeColor(Tools.getColorByName(argCmd1));
+			}
+			else if(contenuCommande.equals("translate"))
+			{
+				Point newPoint = new Point(Integer.parseInt(argCmd1), Integer.parseInt(argCmd2));
+				commandeRetour = new RobiTranslate(newPoint);
+			}
+			
+		}
+		
+		return commandeRetour;
 	}
 
 	public static void main(String[] args) {
@@ -69,7 +115,8 @@ public class Exercice3_0 {
 		abstract public void run();
 	}
 
-	public class SpaceChangeColor implements Command {
+	public class SpaceChangeColor implements Command 
+	{
 		Color newColor;
 
 		public SpaceChangeColor(Color newColor) {
@@ -82,4 +129,63 @@ public class Exercice3_0 {
 		}
 
 	}
+	
+	public class SpaceSleep implements Command 
+	{
+		int millis;
+
+		public SpaceSleep(int newMillis) {
+			this.millis = newMillis;
+		}
+
+		@Override
+		public void run() {
+			Tools.sleep(millis);
+		}
+
+	}
+	
+	public class RobiChangeColor implements Command 
+	{
+		Color newColor;
+
+		public RobiChangeColor(Color newColor) {
+			this.newColor = newColor;
+		}
+
+		@Override
+		public void run() {
+			robi.setColor(newColor);
+		}
+	}
+	
+	public class RobiTranslate implements Command 
+	{
+		Point newPoint;
+
+		public RobiTranslate(Point newPoint) 
+		{
+			this.newPoint = newPoint;
+		}
+		
+		public RobiTranslate(int x, int y)
+		{
+			this.newPoint.x = x;
+			this.newPoint.y = y;
+		}
+		
+		public RobiTranslate(String x, String y)
+		{
+			this.newPoint.x = Integer.parseInt(x);
+			this.newPoint.y = Integer.parseInt(y);
+		}
+
+		@Override
+		public void run() {
+			robi.translate(newPoint);
+		}
+
+	}
+	
+	
 }
