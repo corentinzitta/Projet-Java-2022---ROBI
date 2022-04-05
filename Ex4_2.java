@@ -1,6 +1,8 @@
 package exercice4;
 
- /*
+ import java.awt.Color;
+
+/*
 	(space setColor black)  
 	(robi setColor yellow) 
 	(space sleep 2000) 
@@ -94,52 +96,50 @@ public class Exercice4_2_0
 			return primitives.get(selector);
 		}
 		
-		public void addCommand(String selector, SetColor cmd)
+		public void addCommand(String selector, SetColor cmd) // "setColor" -> SetColor
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
-		public void addCommand(String selector, Translate cmd)
+		public void addCommand(String selector, Translate cmd) // "translate" -> translate
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, SetDim cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, Sleep cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, AddElement cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, DelElement cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, NewElement cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, NewImage cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
 		
 		public void addCommand(String selector, NewString cmd)
 		{
-			//...
+			primitives.put(selector, cmd);
 		}
-		
-		
 		
 		
 		public Reference run(SNode method) //SNode method :  (space setColor black)
@@ -174,43 +174,114 @@ public class Exercice4_2_0
 		}
 	}
 		
-	public class SetColor
+	public class SetColor implements Command
 	{
+		//pas de constructeur (par défaut, ne fait rien)
+		
+		@Override
+		public Reference run(Reference receiver, SNode method) 
+		{
+
+			Object classe = receiver.getReceiver().getClass();
+				
+			if(classe.equals(GRect.class))
+			{
+				((GRect)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+			}
+			else if(classe.equals(GSpace.class))
+			{
+				((GSpace)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+			}
+			else if(classe.equals(GOval.class))
+			{
+				((GOval)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+			}
+			else if(classe.equals(GImage.class))
+			{
+				((GImage)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+			}
+			else if(classe.equals(GString.class))
+			{
+				((GString)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+			}
+			
+			return null;
+		}
+	}
+		
+	public class Translate implements Command
+	{
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}			
 		//...
 	}
 		
-	public class Translate
-	{			
-		//...
-	}
-		
-	public class SetDim
+	public class SetDim implements Command
 	{
-		//...
-	}
-	
-	public class Sleep
-	{
+
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		//...
 	}
 	
-	public class AddElement
+	public class Sleep implements Command
 	{
+
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		//...
 	}
 	
-	public class DelElement
+	public class AddElement implements Command
 	{
+
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		//...
 	}
 	
-	public class NewImage
+	public class DelElement implements Command
 	{
+
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		//...
 	}
 	
-	public class NewString
+	public class NewImage implements Command
 	{
+
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		//...
+	}
+	
+	public class NewString implements Command
+	{
+
+		@Override
+		public Reference run(Reference receiver, SNode method) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		//...
 	}
 	
@@ -225,9 +296,11 @@ public class Exercice4_2_0
 				@SuppressWarnings("unchecked")
 				GElement e = ((Class<GElement>) reference.getReceiver()).getDeclaredConstructor().newInstance();
 				Reference ref = new Reference(e);
+				
 				ref.addCommand("setColor", new SetColor());
 				ref.addCommand("translate", new Translate());
 				ref.addCommand("setDim", new SetDim());
+				
 				return ref;
 			} 
 			catch (Exception e) 
@@ -290,10 +363,24 @@ public class Exercice4_2_0
 			// execution des s-expressions compilees
 			Iterator<SNode> itor = compiled.iterator();
 			while (itor.hasNext()) {
-				new Interpreter().compute(environment, itor.next());
+				//new Interpreter().compute(environment, itor.next());
+				while (itor.hasNext()) {
+					this.run((SNode) itor.next());
+				}
 			}
 		}
 	}
+
+	private void run(SNode expr) 
+	{
+		// quel est le nom du receiver
+		String receiverName = expr.get(0).contents();
+		// quel est le receiver
+		Reference receiver = environment.getReferenceByName(receiverName);
+		// demande au receiver d'executer la s-expression compilee
+		receiver.run(expr);
+	}
+			
 
 	public static void main(String[] args) 
 	{
