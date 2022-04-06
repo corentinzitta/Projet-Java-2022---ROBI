@@ -31,65 +31,87 @@ import stree.parser.SNode;
 import stree.parser.SParser;
 import tools.Tools;
 
-public class Exercice4_1_0 {
-	
-	
-	public interface Command {
-		// le receiver est l'objet qui va executer method
-		// method est la s-expression resultat de la compilation
-		 // du code source a executer
-		// exemple de code source : "(space setColor black)"
+
+
+public class Exercice4_1_0 
+{
+	public interface Command 
+	{
+		// receiver : objet qui va executer method (space ou robi)
+		// method : la s-expression resultat de la compilation du code source a executer : "(space setColor black)"
 		abstract public Reference run(Reference receiver, SNode method);
 	}
 	
-	public class Reference {
-		Object receiver;
-		public Object getReceiver() {
+	/*  permet de référencer un objet graphique à un ensemble de commandes nommées */
+	public class Reference 
+	{
+		Object receiver; //space ou robi (objet graphique) : GSpace ou Grect
+		Map<String, Command> primitives; //commandes primitives disponibles pour le receiver. (setColor et translate, pour robi)
+		
+		public Object getReceiver() 
+		{
 			return receiver;
 		}
-		public void setReceiver(Object receiver) {
+
+		public void setReceiver(Object receiver) 
+		{
 			this.receiver = receiver;
 		}
-
-		Map<String, Command> primitives;
-		public Reference(Object receiver) {
-		this.receiver = receiver;
-		primitives = new HashMap<String, Command>();
-		}
-		public Command getCommandByName(String selector){ 
+		
+		public Reference(Object receiver) 
+		{ 
+			this.receiver = receiver;
+			primitives = new HashMap<String, Command>();
+		} 
+		
+		public Command getCommandByName(String selector) //selector : commande à éxecuter (setColor)
+		{
 			return primitives.get(selector);
 		}
-		public void addCommand(String selector,Command primitive){
+		
+		public void addCommand(String selector, Command primitive)
+		{
 			primitives.put(selector, primitive);
 		}
 		
-		public Reference run(SNode method) {
-			Command var = getCommandByName(method.get(1).contents());
+		public Reference run(SNode method) //SNode method :  (space setColor black)
+		{	
+			String command = method.get(1).contents();
+			
+			Command var = getCommandByName(command);
+			
 			return var.run(this, method);
 		}
 		
 	}
 	
-	public class Environment {
+	//c’est l’environnement qui contient l’ensemble des références (deux jusqu’à présent, space et robi sont les seuls objets référencés).
+	public class Environment 
+	{
 		HashMap<String, Reference> variables;
-		public Environment() {
-		variables = new HashMap<String, Reference>();
+		
+		public Environment() 
+		{
+			variables = new HashMap<String, Reference>();
+		} 
+		
+		public void addReference(String name, Reference objet)
+		{
+			variables.put(name, objet);
 		}
 		
-		public void addReference(String name, Reference reference){
-			variables.put(name, reference);
-		}
-		
-		public Reference getReferenceByName(String name) {
-			return variables.get(name);	
+		public Reference getReferenceByName(String name)
+		{
+			return variables.get(name);
 		}
 	}
-
-    
+	
+	
 	// Une seule variable d'instance
 	Environment environment = new Environment();
 
-	public Exercice4_1_0() {
+	public Exercice4_1_0() 
+	{
 		// space et robi sont temporaires ici
 		GSpace space = new GSpace("Exercice 4", new Dimension(200, 100));
 		GRect robi = new GRect();
@@ -99,36 +121,49 @@ public class Exercice4_1_0 {
 
 		Reference spaceRef = new Reference(space);
 		Reference robiRef = new Reference(robi);
+
+		// Initialisation des references : on leur ajoute les primitives qu'elles
+		// comprenent
+		//
+		// <A VOUS DE CODER>
 		
-		
-		spaceRef.addCommand("setColor",new Command() {
-			public Reference run(Reference receiver, SNode method) {
+		spaceRef.addCommand("setColor", new Command() {
+			public Reference run(Reference receiver, SNode method) 
+			{  
 				((GSpace)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
-				return null;	
-			}
-			});
-		spaceRef.addCommand("sleep",new Command() {
-			public Reference run(Reference receiver, SNode method) {
+				return null;
+			} 
+		});
+		
+		spaceRef.addCommand("sleep", new Command() {
+			public Reference run(Reference receiver, SNode method) 
+			{  
 				Tools.sleep(Integer.parseInt(method.get(2).contents()));
-				return null;	
-			}
-			});
-		robiRef.addCommand("setColor",new Command() {
-			public Reference run(Reference receiver, SNode method) {
+				return null;
+			} 
+		});
+		
+		robiRef.addCommand("setColor", new Command() {
+			public Reference run(Reference receiver, SNode method) 
+			{  
 				((GRect)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
-				return null;	
-			}
-			});
-		robiRef.addCommand("translate",new Command() {
-			public Reference run(Reference receiver, SNode method) {
+				return null;
+			} 
+		});
+		
+		robiRef.addCommand("translate", new Command() {
+			public Reference run(Reference receiver, SNode method) 
+			{  
 				Point newPoint = new Point();
-				newPoint.x=Integer.parseInt(method.get(2).contents());
-				newPoint.y=Integer.parseInt(method.get(3).contents());
+				
+				newPoint.x = Integer.parseInt(method.get(2).contents());
+				newPoint.x = Integer.parseInt(method.get(3).contents());
+				
 				((GRect)receiver.getReceiver()).translate(newPoint);
 				return null;
-			}
-			});
-
+			} 
+		});
+		
 		// Enrigestrement des references dans l'environement par leur nom
 		environment.addReference("space", spaceRef);
 		environment.addReference("robi", robiRef);
@@ -136,7 +171,8 @@ public class Exercice4_1_0 {
 		this.mainLoop();
 	}
 
-	private void mainLoop() {
+	private void mainLoop() 
+	{
 		while (true) {
 			// prompt
 			System.out.print("> ");
