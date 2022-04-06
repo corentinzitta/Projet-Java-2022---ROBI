@@ -157,7 +157,7 @@ public class Exercice4_1_0
 				Point newPoint = new Point();
 				
 				newPoint.x = Integer.parseInt(method.get(2).contents());
-				newPoint.x = Integer.parseInt(method.get(3).contents());
+				newPoint.y = Integer.parseInt(method.get(3).contents());
 				
 				((GRect)receiver.getReceiver()).translate(newPoint);
 				return null;
