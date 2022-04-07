@@ -1,6 +1,6 @@
 package exercice4;
 
- import java.awt.Color;
+import java.awt.Color;
 
 /*
 	(space setColor black)  
@@ -34,11 +34,11 @@ package exercice4;
 (space add hello (label.class new "Hello world"))
 (hello translate 10 10)
 (hello setColor black)
-
 */
 
 
 import java.awt.Dimension;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,23 +57,30 @@ import stree.parser.SNode;
 import stree.parser.SParser;
 import tools.Tools;
 
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+
 
 public class Exercice4_2_0 
 {
 	// Une seule variable d'instance
 	Environment environment = new Environment();
 	
+	/* Les classes qui modélisent des commandes devront implémenter cette interface (ex : SPaceChangeColor implements Command) */
 	public interface Command 
 	{
-		// receiver : objet qui va executer method (space ou robi)
-		// method : la s-expression resultat de la compilation du code source a executer : "(space setColor black)"
+		// Reference : receiver = ( (GSpace) space, (GRect) robi...), l'objet qui concerné par la commande dans la S-expression
+		// SNode : method = la s-expression resultat de la compilation du code source a executer : "(space setColor black)"
 		abstract public Reference run(Reference receiver, SNode method);
 	}
 	
+	/* Référencie un objet graphique à un ensemble de commandes nommées*/
 	public class Reference 
 	{
-		Object receiver; //space ou robi (objet graphique) : GSpace ou Grect
-		Map<String, Command> primitives; //commandes primitives disponibles pour le receiver. (setColor et translate, pour robi)
+		Object receiver; //space ou robi (objet graphique) : GSpace, Grect, GOval...
+		Map<String, Command> primitives; //commandes primitives disponibles pour le receiver. (setColor, translate, pour robi)
 		
 		public Object getReceiver() 
 		{
@@ -141,7 +148,6 @@ public class Exercice4_2_0
 			primitives.put(selector, cmd);
 		}
 		
-		
 		public Reference run(SNode method) //SNode method :  (space setColor black)
 		{	
 			String command = method.get(1).contents();
@@ -153,7 +159,7 @@ public class Exercice4_2_0
 		
 	}
 	
-	//c’est l’environnement qui contient l’ensemble des références (deux jusqu’à présent, space et robi sont les seuls objets référencés).
+	/* Contient l’ensemble des références ( "space" <-> spaceRef , "rect.class" <-> rectClassRef...) */
 	public class Environment 
 	{
 		HashMap<String, Reference> variables;
@@ -173,15 +179,15 @@ public class Exercice4_2_0
 			return variables.get(name);
 		}
 	}
-		
+	
+	/* Command : éxecute la commande demandée (setColor) */
 	public class SetColor implements Command
 	{
 		//pas de constructeur (par défaut, ne fait rien)
 		
 		@Override
 		public Reference run(Reference receiver, SNode method) 
-		{
-
+		{	
 			Object classe = receiver.getReceiver().getClass();
 				
 			if(classe.equals(GRect.class))
@@ -208,84 +214,175 @@ public class Exercice4_2_0
 			return null;
 		}
 	}
-		
-	public class Translate implements Command
+	
+	public class Translate implements Command //(pif translate 100 0)
 	{
 		@Override
-		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
+		public Reference run(Reference receiver, SNode method) 
+		{
+			Object classe = receiver.getReceiver().getClass();
+			
+			Point newPoint = new Point();
+			
+			newPoint.x = Integer.parseInt(method.get(2).contents());
+			newPoint.y = Integer.parseInt(method.get(3).contents());
+			
+			if(classe.equals(GRect.class))
+			{
+				((GRect)receiver.getReceiver()).translate(newPoint);
+			}
+			else if(classe.equals(GOval.class))
+			{
+				((GOval)receiver.getReceiver()).translate(newPoint);
+			}
+			else if(classe.equals(GImage.class))
+			{
+				((GImage)receiver.getReceiver()).translate(newPoint);
+			}
+			else if(classe.equals(GString.class))
+			{
+				((GString)receiver.getReceiver()).translate(newPoint);
+			}
+			
 			return null;
 		}			
-		//...
+
 	}
 		
 	public class SetDim implements Command
 	{
-
 		@Override
 		public Reference run(Reference receiver, SNode method) {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		//...
 	}
 	
-	public class Sleep implements Command
+	public class Sleep implements Command //(space sleep 10)
 	{
-
 		@Override
-		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
+		public Reference run(Reference receiver, SNode method) 
+		{
+			
+			Tools.sleep(Integer.parseInt(method.get(2).contents()));
+			
 			return null;
 		}
-		//...
 	}
 	
+	/*
+	 * AddElement() & DelElement() : sont des commandes réferencées seulement par space
+	 * 
+	 * Reference.receiver => space
+	 * Reference.primitives => "add" - AddElement / "del" - DelElement
+	 * 
+	 */
+	
+	/* Ajoute à l'environnement la référence (ex : (space add robi (rect.class new)) , (space add momo (oval.class new)), (space add pif (image.class new alien.gif) )) */
 	public class AddElement implements Command
+	{	
+		@Override
+        public Reference run(Reference receiver, SNode method) //(space add robi (rect.class new)), (space add momo (oval.class new)), (space add pif (image.class new alien.gif))
+		{
+            String nameNew = method.get(2).contents(); //robi
+            
+            //On execute NewElement pour récupérer sa Référence
+            Reference RefOfNewObject = new Interpreter().compute(environment, method.get(3)); //method.get(3) = rect.class et sa primitive est new qui a deja été associée à NewElement
+
+            environment.addReference(nameNew, RefOfNewObject);
+            
+            GSpace space = ((GSpace)receiver.getReceiver());
+            space.addElement( (GElement)RefOfNewObject.getReceiver() );
+            
+           return RefOfNewObject;
+        }
+	}
+	
+	/* Retire un objet du GSpace (ne le supprime pas de l'environnement, ni des références) */
+	public class DelElement implements Command 
+	{
+		@Override
+		public Reference run(Reference receiver, SNode method) //(space del robi)
+		{
+			String nameADelete = method.get(2).contents(); //robi
+            
+            //on récupère l'objet à delete
+            Reference RefObjADelete = environment.getReferenceByName(nameADelete);
+
+            //On retire l'objet du GSpace
+            GSpace space = ((GSpace)receiver.getReceiver());
+            space.removeElement( (GElement)RefObjADelete.getReceiver() );
+            
+           return RefObjADelete;
+		}
+	}
+	
+	/* Méthode similaire à NewElement mais différent pour traiter les images */
+	public class NewImage implements Command //(space add pif (image.class new alien.gif))
 	{
 
 		@Override
-		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
+		public Reference run(Reference reference, SNode method) 
+		{
+			try 
+			{				
+				File file = new File(method.get(2).contents()); //On ouvre un File vers le fichier que l'on souhaite traiter
+				BufferedImage bufferedImage = ImageIO.read(file); //On lit l'image grace à BufferedImage (tableau de pixels en mémoire)
+				 
+				GImage image = new GImage(bufferedImage);
+				Reference ref = new Reference(image);
+				
+				ref.addCommand("translate", new Translate());
+				
+				return ref;
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+			
 			return null;
 		}
-		//...
+		
 	}
 	
-	public class DelElement implements Command
+	/* Méthode similaire à NewElement mais différent pour traiter les String */
+	public class NewString implements Command //(space add txt (image.class new alien.gif))
 	{
-
+		/* !!!!!!! A MODIFIER !!!!!!! */
+		
 		@Override
-		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
+		public Reference run(Reference receiver, SNode method)
+		{
+			try 
+			{
+				GString texte = new GString();
+				
+				texte.setString(method.get(2).contents());
+				
+				s.setFont(new Font("Arial", Font.BOLD, 18));
+				s.setColor(Color.black);
+				Reference ref = new Reference(s);
+				ref.addCommand("setColor", new SetColor());
+				ref.addCommand("translate", new Translate());
+				return ref;
+			} 
+			catch ( Exception e) 
+			{
+				e.printStackTrace();
+			}
+			
 			return null;
 		}
-		//...
 	}
 	
-	public class NewImage implements Command
-	{
-
-		@Override
-		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		//...
-	}
-	
-	public class NewString implements Command
-	{
-
-		@Override
-		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		//...
-	}
-	
-
+	/*
+	 * Gère la création du nouvel l'objet et créé une réference : 
+	 * 
+	 * ex : (GSpace/GOval/G...) Object receiver
+	 * 		primitives : "setColor" - SetColor(), "translate" - Translate(), "setDim" - SetDim()
+	 * 
+	 */
 	
 	class NewElement implements Command 
 	{
@@ -308,7 +405,7 @@ public class Exercice4_2_0
 			      e.printStackTrace();
 		    }
 			
-			return null;
+			return null; //cas d'erreur
 		}
 	}
 
@@ -318,8 +415,8 @@ public class Exercice4_2_0
 		space.open();
 
 		Reference spaceRef = new Reference(space);
-		Reference rectClassRef = new Reference(GRect.class);
-		Reference ovalClassRef = new Reference(GOval.class);
+		Reference rectClassRef = new Reference(GRect.class); // Utilisation de la classe Class, c'est le point d'entrée de l'exploration du contenu d'une classe par introspection
+		Reference ovalClassRef = new Reference(GOval.class); // Une des 3 façons d'obtenir une instance de Class, est d'appeler cet objet directement (ex : GRect.class, GOval.class..)
 		Reference imageClassRef = new Reference(GImage.class);
 		Reference stringClassRef = new Reference(GString.class);
 
@@ -343,6 +440,22 @@ public class Exercice4_2_0
 		this.mainLoop();
 	}
 	
+	/* Récupère la référence du script (ex : (rect.class new), soit rect.class) et execute sa méthode run avec la commande (new ici) */
+	public class Interpreter
+	{
+		//pas de constructeur
+		
+		public Reference compute(Environment environment, SNode method) 
+		{
+			String stringOfRef = method.get(0).contents(); //method.get(0).contents() = rect.class
+			Reference ref = environment.getReferenceByName(stringOfRef); //on recupere cette référence 
+			
+			ref = ref.run(method); //Execute la commande compris dans le script à partir de la référence (execute "new")
+			
+			return ref;
+		}
+	}
+	
 	private void mainLoop() 
 	{
 		while (true) {
@@ -363,24 +476,11 @@ public class Exercice4_2_0
 			// execution des s-expressions compilees
 			Iterator<SNode> itor = compiled.iterator();
 			while (itor.hasNext()) {
-				//new Interpreter().compute(environment, itor.next());
-				while (itor.hasNext()) {
-					this.run((SNode) itor.next());
-				}
+				new Interpreter().compute(environment, itor.next());
 			}
 		}
 	}
-
-	private void run(SNode expr) 
-	{
-		// quel est le nom du receiver
-		String receiverName = expr.get(0).contents();
-		// quel est le receiver
-		Reference receiver = environment.getReferenceByName(receiverName);
-		// demande au receiver d'executer la s-expression compilee
-		receiver.run(expr);
-	}
-			
+	
 
 	public static void main(String[] args) 
 	{
