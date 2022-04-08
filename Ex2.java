@@ -48,12 +48,11 @@ public class Exercice2_1_0
 	
 	private void run(SNode expr) 
 	{
-		// INSERT CODE BELOW
 		// SNode expr: peut être soit une feuille, soit un nœud intermédiaire.
 		
 		int sizeExpr = expr.size();
 		
-		String contenuNom = expr.get(0).contents(); //rubi ou space
+		String contenuNom = expr.get(0).contents(); //robi ou space
 		String contenuCommande = expr.get(1).contents(); //commande
 		String argCmd1 = expr.get(2).contents(); //argCommande
 		String argCmd2 = "";
@@ -63,7 +62,7 @@ public class Exercice2_1_0
 			argCmd2 = expr.get(3).contents();
 		}
 		
-		if(contenuNom.equals("robi"))
+		if(contenuNom.equals("robi")) //Execution des commandes existantes pour robi
 		{
 			if(contenuCommande.equals("color"))
 			{
@@ -81,7 +80,7 @@ public class Exercice2_1_0
 			
 			
 		}
-		else if(contenuNom.equals("space"))
+		else if(contenuNom.equals("space")) //Execution des commandes existantes pour space
 		{
 			if(contenuCommande.equals("color"))
 			{
