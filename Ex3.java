@@ -63,13 +63,13 @@ public class Exercice3_0 {
 		cmd.run();
 	}
 
-	Command getCommandFromExpr(SNode expr) 
+	Command getCommandFromExpr(SNode expr) //Décomposition de la S-expression pour récupérer la commande à executer et pour qui..
 	{
 		Command commandeRetour = null;
 		
 		int sizeExpr = expr.size();
 		
-		String contenuNom = expr.get(0).contents(); //rubi ou space
+		String contenuNom = expr.get(0).contents(); //robi ou space
 		String contenuCommande = expr.get(1).contents(); //commande
 		String argCmd1 = expr.get(2).contents(); //argCommande
 		String argCmd2 = "";
@@ -129,6 +129,8 @@ public class Exercice3_0 {
 		}
 
 	}
+	
+	/* Implémentation de l'interface Command, définit les différentes commandes possibles pour les GElement */
 	
 	public class SpaceSleep implements Command 
 	{
