@@ -50,6 +50,7 @@ import exercice4.Exercice4_1_0.Command;
 import exercice4.Exercice4_1_0.Reference;
 import graphicLayer.GElement;
 import graphicLayer.GImage;
+import graphicLayer.GBounded;
 import graphicLayer.GOval;
 import graphicLayer.GRect;
 import graphicLayer.GSpace;
@@ -189,27 +190,27 @@ public class Exercice4_2_0
 		@Override
 		public Reference run(Reference receiver, SNode method) 
 		{	
-			Object classe = receiver.getReceiver().getClass();
+			Object classe = receiver.getReceiver().getClass(); // On récupère la classe
 				
 			if(classe.equals(GRect.class))
 			{
-				((GRect)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+				((GRect)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents())); //On modifie la couleur
 			}
 			else if(classe.equals(GSpace.class))
 			{
-				((GSpace)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+				((GSpace)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents())); //On modifie la couleur
 			}
 			else if(classe.equals(GOval.class))
 			{
-				((GOval)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+				((GOval)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents())); //On modifie la couleur
 			}
 			else if(classe.equals(GImage.class))
 			{
-				((GImage)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+				((GImage)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents())); //On modifie la couleur
 			}
 			else if(classe.equals(GString.class))
 			{
-				((GString)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents()));
+				((GString)receiver.getReceiver()).setColor(Tools.getColorByName(method.get(2).contents())); //On modifie la couleur
 			}
 			
 			return null;
@@ -225,24 +226,24 @@ public class Exercice4_2_0
 			
 			Point newPoint = new Point();
 			
-			newPoint.x = Integer.parseInt(method.get(2).contents());
+			newPoint.x = Integer.parseInt(method.get(2).contents()); // Récupération des nouvelles dimensions
 			newPoint.y = Integer.parseInt(method.get(3).contents());
 			
-			if(classe.equals(GRect.class))
+			if(classe.equals(GRect.class)) // Vérification de la classe du receiver.
 			{
-				((GRect)receiver.getReceiver()).translate(newPoint);
+				((GRect)receiver.getReceiver()).translate(newPoint); //On déplace
 			}
 			else if(classe.equals(GOval.class))
 			{
-				((GOval)receiver.getReceiver()).translate(newPoint);
+				((GOval)receiver.getReceiver()).translate(newPoint); //On déplace
 			}
 			else if(classe.equals(GImage.class))
 			{
-				((GImage)receiver.getReceiver()).translate(newPoint);
+				((GImage)receiver.getReceiver()).translate(newPoint); //On déplace
 			}
 			else if(classe.equals(GString.class))
 			{
-				((GString)receiver.getReceiver()).translate(newPoint);
+				((GString)receiver.getReceiver()).translate(newPoint); //On déplace
 			}
 			
 			return null;
@@ -250,12 +251,11 @@ public class Exercice4_2_0
 
 	}
 	
-	/* Redéfinit les dimensions d'un GRect, NE MARCHE QUE SUR UN GRect ET GOval */
+	/* Redéfinit les dimensions d'un GRect, NE MARCHE QUE SUR UN GRect,GOval et GString */
 	public class SetDim implements Command
 	{
 		@Override
 		public Reference run(Reference receiver, SNode method) {
-			receiver= environment.getReferenceByName(method.get(0).contents());
 			Dimension dimension;
 			Point Point = new Point();
 			Point.x = Integer.parseInt(method.get(2).contents());
@@ -263,13 +263,17 @@ public class Exercice4_2_0
 			dimension = new Dimension(Point.x,Point.y);
 			Object classe = receiver.getReceiver().getClass();
 			
-			if(classe.equals(GRect.class))
+			if(classe.equals(GRect.class)) // Vérification de la classe du receiver.
 			{
-				((GRect)receiver.receiver).setDimension(dimension);
+				((GRect)receiver.getReceiver()).setDimension(dimension); // On redimensionne
 			}
 			else if(classe.equals(GOval.class))
 			{
-				((GOval)receiver.receiver).setDimension(dimension);
+				((GOval)receiver.getReceiver()).setDimension(dimension); // On redimensionne
+			}
+			else if(classe.equals(GString.class))
+			{
+				((GString)receiver.getReceiver()).setFont(new Font("Impact", Font.ITALIC, Point.x)); // On redimensionne via setFont et non setDimension
 			}
 			
 			return null;
@@ -281,7 +285,7 @@ public class Exercice4_2_0
 		@Override
 		public Reference run(Reference receiver, SNode method) 
 		{
-			Tools.sleep(Integer.parseInt(method.get(2).contents()));
+			Tools.sleep(Integer.parseInt(method.get(2).contents())); //Marque une pause, le nombre de milisecondes est définit par le paramètre.
 			
 			return null;
 		}
@@ -349,7 +353,7 @@ public class Exercice4_2_0
 				GImage image = new GImage(bufferedImage);
 				Reference ref = new Reference(image);
 				
-				ref.addCommand("translate", new Translate());
+				ref.addCommand("translate", new Translate()); //Ajout de la commande translate.
 				
 				return ref;
 			} 
@@ -364,24 +368,23 @@ public class Exercice4_2_0
 	}
 	
 	/* Méthode similaire à NewElement mais différent pour traiter les String */
-	public class NewString implements Command //(space add txt (image.class new alien.gif))
+	public class NewString implements Command
 	{
-		/* !!!!!!! A MODIFIER !!!!!!! */
-		
 		@Override
 		public Reference run(Reference receiver, SNode method)
 		{
 			try 
 			{
-				GString Chaineaajouter = new GString();
+				GString StringToAdd = new GString();
 				
-				Chaineaajouter.setString(method.get(2).contents());
-				Chaineaajouter.setFont(new Font("Impact", Font.ITALIC, 32));
-				Chaineaajouter.setColor(Color.blue);
+				StringToAdd.setString(method.get(2).contents());	//Construction de la chaine
+				StringToAdd.setFont(new Font("Impact", Font.ITALIC, 32)); //Construction de la chaine
+				StringToAdd.setColor(Color.blue); //Construction de la chaine
 				
-				Reference refe = new Reference(Chaineaajouter);
-				refe.addCommand("setColor", new SetColor());
+				Reference refe = new Reference(StringToAdd);
+				refe.addCommand("setColor", new SetColor());	//Ajout des commandes pour cette nouvelle chaine dynamique
 				refe.addCommand("translate", new Translate());
+				refe.addCommand("setDim", new SetDim());
 				return refe;
 			} 
 			catch ( Exception e) 
@@ -411,7 +414,7 @@ public class Exercice4_2_0
 				GElement e = ((Class<GElement>) reference.getReceiver()).getDeclaredConstructor().newInstance();
 				Reference ref = new Reference(e);
 				
-				ref.addCommand("setColor", new SetColor());
+				ref.addCommand("setColor", new SetColor());		//Ajout des commandes pour ce nouvel élément.
 				ref.addCommand("translate", new Translate());
 				ref.addCommand("setDim", new SetDim());
 				
@@ -437,19 +440,19 @@ public class Exercice4_2_0
 		Reference imageClassRef = new Reference(GImage.class);
 		Reference stringClassRef = new Reference(GString.class);
 
-		spaceRef.addCommand("setColor", new SetColor());
+		spaceRef.addCommand("setColor", new SetColor()); // Ajout des commandes dans space
 		spaceRef.addCommand("sleep", new Sleep());
 		spaceRef.addCommand("setDim", new SetDim());
 
-		spaceRef.addCommand("add", new AddElement());
+		spaceRef.addCommand("add", new AddElement());	//Ajout des commandes dans space(celles-ci sont spécifiques à space.
 		spaceRef.addCommand("del", new DelElement());
 		
-		rectClassRef.addCommand("new", new NewElement());
+		rectClassRef.addCommand("new", new NewElement());	//Ajout de la commande new dans les références
 		ovalClassRef.addCommand("new", new NewElement());
 		imageClassRef.addCommand("new", new NewImage());
 		stringClassRef.addCommand("new", new NewString());
 
-		environment.addReference("space", spaceRef);
+		environment.addReference("space", spaceRef);		//On met les références dans l'environnement.
 		environment.addReference("rect.class", rectClassRef);
 		environment.addReference("oval.class", ovalClassRef);
 		environment.addReference("image.class", imageClassRef);
