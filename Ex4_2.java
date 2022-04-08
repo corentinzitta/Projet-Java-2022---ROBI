@@ -38,6 +38,7 @@ import java.awt.Color;
 
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -248,12 +249,29 @@ public class Exercice4_2_0
 		}			
 
 	}
-		
+	
+	/* Redéfinit les dimensions d'un GRect, NE MARCHE QUE SUR UN GRect */
 	public class SetDim implements Command
 	{
 		@Override
 		public Reference run(Reference receiver, SNode method) {
-			// TODO Auto-generated method stub
+			receiver= environment.getReferenceByName(method.get(0).contents());
+			Dimension dimension;
+			Point Point = new Point();
+			Point.x = Integer.parseInt(method.get(2).contents());
+			Point.y = Integer.parseInt(method.get(3).contents());
+			dimension = new Dimension(Point.x,Point.y);
+			Object classe = receiver.getReceiver().getClass();
+			
+			if(classe.equals(GRect.class))
+			{
+				((GRect)receiver.receiver).setDimension(dimension);
+			}
+			else if(classe.equals(GOval.class))
+			{
+				((GOval)receiver.receiver).setDimension(dimension);
+			}
+			
 			return null;
 		}
 	}
@@ -263,7 +281,6 @@ public class Exercice4_2_0
 		@Override
 		public Reference run(Reference receiver, SNode method) 
 		{
-			
 			Tools.sleep(Integer.parseInt(method.get(2).contents()));
 			
 			return null;
@@ -356,16 +373,16 @@ public class Exercice4_2_0
 		{
 			try 
 			{
-				GString texte = new GString();
+				GString Chaineaajouter = new GString();
 				
-				texte.setString(method.get(2).contents());
+				Chaineaajouter.setString(method.get(2).contents());
+				Chaineaajouter.setFont(new Font("Impact", Font.ITALIC, 32));
+				Chaineaajouter.setColor(Color.blue);
 				
-				s.setFont(new Font("Arial", Font.BOLD, 18));
-				s.setColor(Color.black);
-				Reference ref = new Reference(s);
-				ref.addCommand("setColor", new SetColor());
-				ref.addCommand("translate", new Translate());
-				return ref;
+				Reference refe = new Reference(Chaineaajouter);
+				refe.addCommand("setColor", new SetColor());
+				refe.addCommand("translate", new Translate());
+				return refe;
 			} 
 			catch ( Exception e) 
 			{
@@ -422,6 +439,7 @@ public class Exercice4_2_0
 
 		spaceRef.addCommand("setColor", new SetColor());
 		spaceRef.addCommand("sleep", new Sleep());
+		spaceRef.addCommand("setDim", new SetDim());
 
 		spaceRef.addCommand("add", new AddElement());
 		spaceRef.addCommand("del", new DelElement());
