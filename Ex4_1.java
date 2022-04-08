@@ -125,7 +125,6 @@ public class Exercice4_1_0
 		// Initialisation des references : on leur ajoute les primitives qu'elles
 		// comprenent
 		//
-		// <A VOUS DE CODER>
 		
 		spaceRef.addCommand("setColor", new Command() {
 			public Reference run(Reference receiver, SNode method) 
