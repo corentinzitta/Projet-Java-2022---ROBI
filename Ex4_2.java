@@ -82,7 +82,7 @@ public class Exercice4_2_0
 	public class Reference 
 	{
 		Object receiver; //space ou robi (objet graphique) : GSpace, Grect, GOval...
-		Map<String, Command> primitives; //commandes primitives disponibles pour le receiver. (setColor, translate, pour robi)
+		Map<String, Command> primitives; //commandes primitives disponibles pour le receiver. (setColor, translate, pour robi) "setColor"-> SetColorFct
 		
 		public Object getReceiver() 
 		{
@@ -442,7 +442,6 @@ public class Exercice4_2_0
 
 		spaceRef.addCommand("setColor", new SetColor()); // Ajout des commandes dans space
 		spaceRef.addCommand("sleep", new Sleep());
-		spaceRef.addCommand("setDim", new SetDim());
 
 		spaceRef.addCommand("add", new AddElement());	//Ajout des commandes dans space(celles-ci sont spécifiques à space.
 		spaceRef.addCommand("del", new DelElement());
