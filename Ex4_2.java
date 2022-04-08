@@ -250,7 +250,7 @@ public class Exercice4_2_0
 
 	}
 	
-	/* Redéfinit les dimensions d'un GRect, NE MARCHE QUE SUR UN GRect */
+	/* Redéfinit les dimensions d'un GRect, NE MARCHE QUE SUR UN GRect ET GOval */
 	public class SetDim implements Command
 	{
 		@Override
