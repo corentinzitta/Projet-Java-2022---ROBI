@@ -1,15 +1,7 @@
 # JavaProject-ROBI_C
-JavaProject2022-ROBI_C
+Projet Java de licence informatique
 
-##### LISEZMOI #####
-
-##### Nom des auteurs : 
-- Charpiat Arthur
-- Zitta Corentin
-- Lanciaux Jérôme
-- Mouanda Mouanda Jean-Jacques
-
-##### Liste de ce qui a été rendu : 
+##### Ce qui a été produit : 
 
 1. Exercice 1 : 
 	- Création d'une fenêtre avec un carré bleu. En position 0.0 (en haut a gauche)
